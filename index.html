@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>💌 Valentine?</title>
+
+<style>
+:root{
+  --bg1:#fff1f5;
+  --bg2:#ffe4ec;
+  --card:#ffffffcc;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --yes:#22c55e;
+  --no:#ef4444;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system;
+  height:100vh;
+  display:grid;
+  place-items:center;
+  background:
+  radial-gradient(1200px 800px at 20% 20%, var(--bg2), transparent 60%),
+  linear-gradient(135deg, var(--bg1), #fff);
+}
+
+.card{
+  background:var(--card);
+  backdrop-filter: blur(10px);
+  border-radius:26px;
+  padding:40px;
+  text-align:center;
+  width:min(680px,90%);
+  box-shadow:0 30px 80px rgba(0,0,0,.12);
+}
+
+h1{
+  font-size:38px;
+  margin:0 0 8px;
+}
+
+p{
+  color:var(--muted);
+  margin-bottom:22px;
+}
+
+.question{
+  font-size:28px;
+  font-weight:800;
+  margin-bottom:22px;
+}
+
+.buttons{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+}
+
+button{
+  border:none;
+  border-radius:999px;
+  padding:14px 28px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+
+#yesBtn{
+  background:var(--yes);
+  color:white;
+}
+
+#noBtn{
+  background:var(--no);
+  color:white;
+}
+
+.result{
+  display:none;
+  font-size:34px;
+  font-weight:900;
+  color:#e11d48;
+  margin-top:20px;
+  animation:pop .45s ease;
+}
+
+@keyframes pop{
+  from{opacity:0; transform:scale(.6);}
+  to{opacity:1; transform:scale(1);}
+}
+
+/* =========================
+   OVERLAY (ADDED ONLY)
+   - Uses same font + same CSS variables
+========================= */
+#startOverlay{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(1200px 800px at 20% 20%, var(--bg2), transparent 60%),
+    linear-gradient(135deg, var(--bg1), #fff);
+  z-index:9999;
+}
+
+#startOverlay .card{
+  /* reuse your existing .card look */
+  width:min(680px,90%);
+}
+
+#startBtn{
+  background: linear-gradient(180deg, #34d399, var(--yes));
+  color:#062a16;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ✅ TAP-TO-START OVERLAY (ADDED ONLY) -->
+<div id="startOverlay" aria-label="Tap to start">
+  <div class="card">
+    <h1>Tap to start 💖</h1>
+    <p>I am bestowing upon you the biggest responsbility. Also turn on the volume to hear the music!</p>
+    <div class="buttons">
+      <button id="startBtn" type="button">Alright I am ready</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+
+  <h1>My Charm✨</h1>
+  <p id="sub">I have one important question…</p>
+
+  <div class="question" id="questionText">
+    Will you be my Valentine also PA😬?
+  </div>
+
+  <div class="buttons" id="btnBox">
+    <button id="yesBtn">Yes 💚</button>
+    <button id="noBtn">No 💔</button>
+  </div>
+
+  <div class="result" id="resultBox">
+    Baccha you have made me the happiest man alive!!! 💕
+  </div>
+
+</div>
+
+<!-- 🔊 MUSIC PLAYER (hidden) -->
+<audio id="bgMusic"></audio>
+
+<script>
+/* =========================
+   EXISTING BUTTON LOGIC
+========================= */
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const btnBox = document.getElementById("btnBox");
+const resultBox = document.getElementById("resultBox");
+const question = document.getElementById("questionText");
+const sub = document.getElementById("sub");
+
+let yesScale = 1;
+let noScale = 1;
+let clicks = 0;
+
+const phrases = [
+  "No? 🤨",
+  "Are you sure baccha?",
+  "Seriously again NO..?",
+  "That's hurtful baby 😢",
+  "Last chance…",
+  "This button is tiny now 😭"
+];
+
+noBtn.onclick = () => {
+  clicks++;
+
+  yesScale += 0.18;
+  noScale -= 0.12;
+  if(noScale < 0.25) noScale = 0.25;
+
+  yesBtn.style.transform = `scale(${yesScale})`;
+  noBtn.style.transform = `scale(${noScale})`;
+
+  if(clicks < phrases.length) noBtn.textContent = phrases[clicks];
+  sub.textContent = "Just press Yes already 🥹";
+};
+
+yesBtn.onclick = () => {
+  btnBox.style.display = "none";
+  question.textContent = "YAYYYY 💘";
+  sub.textContent = "";
+  resultBox.style.display = "block";
+};
+
+/* =========================
+   BACKGROUND MUSIC (RELIABLE)
+   - Playlist plays back-to-back
+   - Starts ONLY after Start tap (guaranteed)
+========================= */
+const music = document.getElementById("bgMusic");
+const playlist = ["song1.mp3", "song2.mp3", "song3.mp3"];
+let current = 0;
+
+function playSong(index){
+  music.src = playlist[index];
+  return music.play();
+}
+
+music.addEventListener("ended", () => {
+  current = (current + 1) % playlist.length;
+  playSong(current).catch(()=>{});
+});
+
+/* =========================
+   OVERLAY START (ADDED ONLY)
+========================= */
+const overlay = document.getElementById("startOverlay");
+const startBtn = document.getElementById("startBtn");
+
+startBtn.addEventListener("click", () => {
+  // start playlist
+  playSong(0).then(() => {
+    // hide overlay only after music successfully starts
+    overlay.style.display = "none";
+  }).catch(() => {
+    // if something fails (missing file), still remove overlay
+    // but your music won’t play — check filenames.
+    overlay.style.display = "none";
+  });
+});
+</script>
+
+</body>
+</html>
